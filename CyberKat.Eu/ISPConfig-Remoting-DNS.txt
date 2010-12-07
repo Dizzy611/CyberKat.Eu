@@ -1,0 +1,142 @@
+ISPConfig SOAP Remoting API: DNS functions.
+
+Contents:
+1. Important Notice.
+2. Licensing.
+3. Glossary
+4. DNS Zone functions
+5. AAAA record functions
+6. A record functions.
+7. CNAME record functions.
+8. MX record functions
+9. NS record functions
+10. TXT record functions
+
+-------------------------------------------------------------------------------1--------------------------------------------------------------------------------------------
+Documentation is barely formatted and in alpha state please bear this in mind. Also, the person documenting is a sardonic prat and has slowly come to loathe
+the code he's documenting.
+-------------------------------------------------------------------------------2--------------------------------------------------------------------------------------------
+Documentation is (C) 2010 CyberKat.Eu & Dylan J Morrison and is currently licensed under CC-Attribution-3.0-Generic with the understanding that 
+this license may and probably will change without notice at any point in the future.
+
+License is described at http://creativecommons.org/licenses/by/3.0/
+-------------------------------------------------------------------------------3--------------------------------------------------------------------------------------------
+
+
+Glossary:
+$session_id is your SOAP session. 
+$primary_id is the ID of the DNS Zone/A Record/etc you're getting info on.
+$client_id is the ID of the client you are performing the function for.
+$params are the parameters to pass to the form, and will be defined after the function as long as they have changed since the last time they were defined.
+
+-------------------------------------------------------------------------------4-------------------------------------------------------------------------------------------
+dns_zone_get( $session_id, $primary_id ) <-- Get a DNS Zone definition. 
+
+dns_zone_add( $session_id, $client_id, $params ) <-- Add
+	$params is:
+		'server_id' <-- ID of server
+		'origin' <-- Zone name. Generally domain.tld. final period important
+		'ns' <-- Nameserver. (RFC calls this "MNAME")
+		'mbox' <-- Mailbox (in address.mailserver format) of person responsible for this zone. (RFC calls this "RNAME")
+		'serial' <-- Serial number for zone. (YYYYMMDDRevision)
+		'refresh' <-- Time for records to refresh. Leave at default 28800 seconds
+		'retry' <-- Time for records to be retried. Leave at default 7200 seconds
+		'expire' <-- Time for records to expire (on client side). Leave at default 604800 seconds.
+		'minimum' <-- Minimum TTL for records in zone. Which is 86400 seconds.
+		'ttl' <-- Time To Live. Leave at default 86400 seconds
+		'xfer' <-- Allow zone transfer to these ips. (We want to put our other slave nameservers here)
+		'also_notify' <-- Notify these nameservers of the new/updated zone (Used for non-authoritative slaves, of which we have none. Leave empty.)
+		'update_acl' <-- Leave empty.
+		'active' <-- Whether or not the zone is active.
+
+dnz_zone_update( $session_id, $client_id, $primary_id, $params ) <--- Update 
+	$params is:
+		The same as the above.
+
+dns_zone_delete ( $session_id, $primary_id ) <-- Delete 
+------------------------------------------------------------------------------5--------------------------------------------------------------------------------------------
+dns_aaaa_get ( $session_id, $primary_id ) <-- Get an AAAA record definition
+
+dns_aaaa_add ( $session_id, $client_id, $params ) <-- Add 
+	$params is:
+		'server_id' <--- ID of server
+		'zone' <--- primary_id of zone to put AAAA record in
+		'name' <--- DNS name of AAAA record.
+		'type' <---... In case you want to add an AAAA record thats not an AAAA record, apparently. Why did they expose this parameter?
+		'data' <--- IPv6 address
+		'ttl' <-- Time to live. Default at 86400. We love that number! 
+		'active' <-- Whether or not the AAAA record is active.
+		'stamp' <--- Unix timestamp at which record was last changed/added/etc. Not actually necessary but somewhat useful.
+		'serial' <--- Rather unnecessary field. Grab from the parent Zone.
+
+dns_aaaa_update ( $session_id, $client_id, $primary_id, $params ) <-- Update 
+
+dns_aaaa_delete ( $session_id, $primary_id ) <-- Delete 
+----------------------------------------------------------------------------6----------------------------------------------------------------------------------------------
+dns_a_get ( $session_id, $primary_id ) <-- Get an A record definition
+
+dns_a_add ( $session_id, $client_id, $params ) <-- Add 
+	$params is:
+		'server_id' <--- ID of server
+		'zone' <--- primary_id of zone to put A record in
+		'name' <--- DNS name of A record.
+		'type' <---... In case you want to add an A record thats not an A record, apparently. Why did they expose this parameter?
+		'data' <--- IPv4 address
+		'ttl' <-- Time to live. Default at 86400. We love that number! 
+		'active' <-- Whether or not the A record is active.
+		'stamp' <--- Unix timestamp at which record was last changed/added/etc. Not actually necessary but somewhat useful.
+		'serial' <--- Rather unnecessary field. Grab from the parent Zone.
+		... o/` Everything is exactly the same o/`
+
+dns_a_update ( $session_id, $client_id, $primary_id, $params ) <-- Update 
+
+dns_a_delete ( $session_id, $primary_id ) <--- Delete 
+---------------------------------------------------------------------------6a----------------------------------------------------------------------------------------------
+!!!!!!!!!!!!!!!!!!!!
+For all future dns record functions as they use the same parameters with simply a change in what 'data' means, I will simply define 'data'.
+!!!!!!!!!!!!!!!!!!!!
+----------------------------------------------------------------------------7-----------------------------------------------------------------------------------------------
+dns_cname_get ( $session_id, $primary_id ) <--- Get a CNAME record definition
+
+dns_cname_add ( $session_id, $client_id, $params ) <--- Add
+	$params is:
+		The same as A except:
+		'data' <--- DNS name to reference
+
+dns_cname_update ( $session_id, $client_id, $primary_id, $params ) <--- Update
+
+dns_cname_delete ( $session_id, $primary_id ) <--- Delete 
+---------------------------------------------------------------------------8------------------------------------------------------------------------------------------------
+dns_mx_get ( $session_id, $primary_id ) <-- Get an MX record definition
+
+dns_mx_add ( $session_id, $client_id, $params ) <--- Add
+	$params is:
+		The same as A except:
+		'data' <-- an MX record. Read your RFCs, its a little too hard to explain here in a one liner.
+
+dns_mx_update ( $session_id, $client_id, $primary_id, $params ) <--- Update
+
+dns_mx_delete ( $session_id, $primary_id ) <--- Delete
+---------------------------------------------------------------------------9------------------------------------------------------------------------------------------------
+dns_ns_get ( $session_id, $primary_id ) <-- Get an NS record definition
+
+dns_ns_add ( $session_id, $client_id, $params ) <--- Add
+	$params is:
+		The same as A except:
+		'data' <--- Authoritative nameserver.
+
+dns_ns_update ( $session_id, $client_id, $primary_id, $params ) <-- Update
+
+dns_ns_delete ( $session_id, $primary_id ) <-- Delete
+--------------------------------------------------------------------------10-----------------------------------------------------------------------------------------------
+dns_txt_get ( $session_id, $primary_id ) <-- Get a TXT record definition
+
+dns_txt_add ( $session_id, $client_id, $params ) <--- Add
+	$params is:
+		The same as A except:
+		'data' <--- Whatever random crap you want to put in your TXT record. No, seriously.
+
+dns_txt_update ( $session_id, $client_id, $primary_id, $params ) <-- Update
+
+dns_txt_delete ( $session_id, $primary_id ) <-- Delete
+---------------------------------------------------------------------EOF---------------------------------------------------------------------------------------------------
